@@ -26,6 +26,8 @@ func main() {
 
 	e := echo.New()
 	e.Use(middleware.Logger())
+	e.Static("/images", "images")
+	e.Static("/css", "css")
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

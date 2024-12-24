@@ -16,7 +16,10 @@ func getImageFromFilePath(filepath string) (image.Image, error) {
 	return image, err
 }
 
-func applyKernel(image.Image, float32[])
+func applyKernel(inImage image.Image, kernel []float32)
+{
+	
+}
 
 func main() {
 
