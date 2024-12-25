@@ -7,7 +7,7 @@
 5. count time
 6. make a working version
 7. docker, load balancer
-8. optional: authentification
+8. optional: authentication
 
 # Lab 2
 1. rabbit MQ request reply
