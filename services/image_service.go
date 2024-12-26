@@ -13,13 +13,13 @@ import (
 
 func modifyImage(c echo.Context) error {
 
-	filename := c.Param("ImagePath")
+	filename := c.QueryParam("ImagePath")
 
 	fmt.Printf("ImagePath of original image %s \n", filename)
 
 	img, err := util.GetImageFromFilePath(fmt.Sprintf("../images/%s", filename))
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	uuid, err := uuid.NewRandom()
@@ -32,7 +32,9 @@ func modifyImage(c echo.Context) error {
 	newFilename := uuid.String() + filepath.Ext(filename)
 	fmt.Printf("created uuid %s \n", newFilename)
 
-	err = util.WriteImageToFilePath(util.PosterizeImage(img, 5), newFilename)
+	newFilePath := fmt.Sprintf("../images/%s", newFilename)
+
+	err = util.WriteImageToFilePath(util.PosterizeImage(img, 5), newFilePath)
 
 	if err != nil {
 		return err

@@ -39,6 +39,7 @@ func SendImageToService(filename string) (string, error) {
 	query := req.URL.Query()
 	query.Add("ImagePath", filename)
 	req.URL.RawQuery = query.Encode() // set query param
+	fmt.Printf("sent filename %s to url \n", filename)
 
 	if err != nil {
 		fmt.Printf("client: could not create request: %s\n", err)
@@ -104,7 +105,9 @@ func HandlePostImage(c echo.Context) error {
 		return err
 	}
 
-	htmlToImageFilePath := fmt.Sprintf("<img src=\"/images/%s\" id=\"returned-image\">", filename)
+	alteredPic, err := SendImageToService(filename)
+
+	htmlToImageFilePath := fmt.Sprintf("<img src=\"/images/%s\" id=\"returned-image\">", alteredPic)
 	fmt.Println(htmlToImageFilePath)
 
 	return c.HTML(http.StatusOK, htmlToImageFilePath)
