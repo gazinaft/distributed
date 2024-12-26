@@ -10,7 +10,9 @@
 	</head>
 	<body>
 		<form  class="form">
-			<div id="altered_image"></div>
+			<div id="altered_image">
+				{{ .ImageLink }}
+			</div>
 			<div>
 				<label for="avatarInput">Select Image</label>
 				<input type="file" class="form-control" id="imageInput" name="image" required>

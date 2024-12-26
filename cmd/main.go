@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 
@@ -14,6 +15,10 @@ import (
 
 type Templates struct {
 	templates *template.Template
+}
+
+type ImageLink struct {
+	ImageLink string
 }
 
 func (t *Templates) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
@@ -38,7 +43,7 @@ func SendImageToService(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Successfully opened file")
+	fmt.Println("Successfully opened file")
 
 	defer src.Close()
 
@@ -50,10 +55,10 @@ func SendImageToService(c echo.Context) error {
 
 	// get unique filename
 	filename := uuid.String() + filepath.Ext(file.Filename)
-	fmt.Printf("created uuid %s", filename)
+	fmt.Printf("created uuid %s \n", filename)
 
 	// Destination
-	fullFilePath := fmt.Sprintf("./image/%s", filename)
+	fullFilePath := fmt.Sprintf("./images/%s", filename)
 	dst, err := os.Create(fullFilePath)
 	if err != nil {
 		return err
@@ -63,7 +68,11 @@ func SendImageToService(c echo.Context) error {
 	if _, err = io.Copy(dst, src); err != nil {
 		return err
 	}
-	return nil
+
+	htmlToImageFilePath := fmt.Sprintf("<img src=\"/images/%s\" id=\"returned-image\">", filename)
+	fmt.Println(htmlToImageFilePath)
+
+	return c.HTML(http.StatusOK, htmlToImageFilePath)
 }
 
 func main() {
