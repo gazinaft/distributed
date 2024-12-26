@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func getImageFromFilePath(filepath string) (image.Image, error) {
+func GetImageFromFilePath(filepath string) (image.Image, error) {
 	f, err := os.Open(filepath)
 	if err != nil {
 		return nil, err
@@ -19,7 +19,7 @@ func getImageFromFilePath(filepath string) (image.Image, error) {
 	return image, err
 }
 
-func writeImageToFilePath(inImage image.Image, filepath, name string) error {
+func WriteImageToFilePath(inImage image.Image, filepath, name string) error {
 	f, err := os.Create(fmt.Sprintf("%s/%s.jpg", filepath, name))
 	if err != nil {
 		log.Printf("failed to create file: %v", err)
@@ -34,12 +34,6 @@ func writeImageToFilePath(inImage image.Image, filepath, name string) error {
 }
 
 func main() {
-	img, err := getImageFromFilePath("./image/dog.jpg")
-	if err != nil {
-		panic(err)
-	}
-
-	writeImageToFilePath(posterize_image(img, 5), "./image", "dog2")
 
 	// IMPORTANT, http get query
 	// url := "http://localhost:8080"

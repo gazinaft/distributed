@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"fmt"
@@ -8,8 +8,6 @@ import (
 
 	"github.com/crazy3lf/colorconv"
 )
-
-const posterization_levels = 8
 
 func posterize(value, levels float64) float64 {
 	return math.Round(value*levels) / levels
@@ -23,7 +21,7 @@ func pixel_posterization(inPixel color.Color, levels float64) (color.Color, erro
 	return colorconv.HSVToColor(h, s, v)
 }
 
-func posterize_image(inImage image.Image, levels float64) image.Image {
+func PosterizeImage(inImage image.Image, levels float64) image.Image {
 
 	newImage := image.NewRGBA(image.Rect(0, 0, inImage.Bounds().Max.X, inImage.Bounds().Max.Y))
 
