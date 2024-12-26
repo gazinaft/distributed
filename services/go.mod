@@ -4,7 +4,10 @@ go 1.23.2
 
 require github.com/labstack/echo/v4 v4.13.3
 
-require github.com/crazy3lf/colorconv v1.2.0 // indirect
+require (
+	github.com/crazy3lf/colorconv v1.2.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
+)
 
 require (
 	github.com/gazinaft/distributed/util v0.0.0

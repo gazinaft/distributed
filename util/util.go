@@ -1,7 +1,6 @@
 package util
 
 import (
-	"fmt"
 	"image"
 	"image/jpeg"
 	"log"
@@ -19,8 +18,8 @@ func GetImageFromFilePath(filepath string) (image.Image, error) {
 	return image, err
 }
 
-func WriteImageToFilePath(inImage image.Image, filepath, name string) error {
-	f, err := os.Create(fmt.Sprintf("%s/%s.jpg", filepath, name))
+func WriteImageToFilePath(inImage image.Image, filepath string) error {
+	f, err := os.Create(filepath)
 	if err != nil {
 		log.Printf("failed to create file: %v", err)
 		return err
@@ -31,32 +30,4 @@ func WriteImageToFilePath(inImage image.Image, filepath, name string) error {
 		return err
 	}
 	return nil
-}
-
-func main() {
-
-	// IMPORTANT, http get query
-	// url := "http://localhost:8080"
-	// resp, err := http.Get(url)
-	// if err != nil {
-	// 	// we will get an error at this stage if the request fails, such as if the
-	// 	// requested URL is not found, or if the server is not reachable.
-	// 	log.Fatal(err)
-	// }
-	// defer resp.Body.Close()
-
-	// // if we want to check for a specific status code, we can do so here
-	// // for example, a successful request should return a 200 OK status
-	// if resp.StatusCode != http.StatusOK {
-	// 	// if the status code is not 200, we should log the status code and the
-	// 	// status string, then exit with a fatal error
-	// 	log.Fatalf("status code error: %d %s", resp.StatusCode, resp.Status)
-	// }
-
-	// // print the response
-	// data, err := io.ReadAll(resp.Body)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Println(string(data))
 }

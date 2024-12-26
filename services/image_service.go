@@ -1,27 +1,44 @@
-package services
+package main
 
 import (
+	"fmt"
 	"net/http"
+	"path/filepath"
 
 	"github.com/gazinaft/distributed/util"
-
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 func modifyImage(c echo.Context) error {
 
-	filename := c.Param("")
+	filename := c.Param("ImagePath")
 
-	img, err := util.GetImageFromFilePath(filename)
+	fmt.Printf("ImagePath of original image %s \n", filename)
+
+	img, err := util.GetImageFromFilePath(fmt.Sprintf("../images/%s", filename))
 	if err != nil {
 		panic(err)
 	}
 
-	util.WriteImageToFilePath(util.PosterizeImage(img, 5), "./image", "dog2")
+	uuid, err := uuid.NewRandom()
 
-	id := "5"
-	return c.String(http.StatusOK, id)
+	if err != nil {
+		return err
+	}
+
+	// get unique filename
+	newFilename := uuid.String() + filepath.Ext(filename)
+	fmt.Printf("created uuid %s \n", newFilename)
+
+	err = util.WriteImageToFilePath(util.PosterizeImage(img, 5), newFilename)
+
+	if err != nil {
+		return err
+	}
+
+	return c.String(http.StatusOK, newFilename)
 }
 
 func main() {
@@ -30,6 +47,6 @@ func main() {
 
 	e.GET("/", modifyImage)
 
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":8081"))
 
 }

@@ -31,13 +31,48 @@ func newTemplate() *Templates {
 	}
 }
 
-func SendImageToService(c echo.Context) error {
+func SendImageToService(filename string) (string, error) {
+	url := "http://localhost:8081/"
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+
+	query := req.URL.Query()
+	query.Add("ImagePath", filename)
+	req.URL.RawQuery = query.Encode() // set query param
+
+	if err != nil {
+		fmt.Printf("client: could not create request: %s\n", err)
+		return "", err
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Printf("client: error making http request: %s\n", err)
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", err
+	}
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Printf("Service returned %s \n", string(data))
+
+	return string(data), nil
+}
+
+func HandlePostImage(c echo.Context) error {
 	file, err := c.FormFile("image")
 
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Successfully submitted form")
+	fmt.Println("Successfully submitted form")
 
 	src, err := file.Open()
 	if err != nil {
@@ -88,7 +123,7 @@ func main() {
 		return c.Render(200, "index", nil)
 	})
 
-	e.POST("/upload", SendImageToService)
+	e.POST("/upload", HandlePostImage)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
