@@ -3,9 +3,9 @@
 1. ~~read/write image to fs.~~
 2. ~~send request from htmx server to service~~
 3. ~~make image processing algorithm~~ 
-4. create an htmx form to upload image and show resulting images
-5. count time
-6. make a working version
+4. ~~create an htmx form to upload image and show resulting images~~
+5. ~~count time~~
+6. ~~make a working version~~
 7. docker, load balancer
 8. optional: authentication
 

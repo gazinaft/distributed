@@ -9,6 +9,7 @@ require (
 )
 
 require (
+	github.com/gazinaft/distributed/util v0.0.0
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -20,3 +21,5 @@ require (
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.8.0 // indirect
 )
+
+replace github.com/gazinaft/distributed/util => ./util
