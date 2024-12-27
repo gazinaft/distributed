@@ -17,7 +17,7 @@ func modifyImage(c echo.Context) error {
 
 	fmt.Printf("ImagePath of original image %s \n", filename)
 
-	img, err := util.GetImageFromFilePath(fmt.Sprintf("../images/%s", filename))
+	img, err := util.GetImageFromFilePath(fmt.Sprintf("images/%s", filename))
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func modifyImage(c echo.Context) error {
 	newFilename := uuid.String() + filepath.Ext(filename)
 	fmt.Printf("created uuid %s \n", newFilename)
 
-	newFilePath := fmt.Sprintf("../images/%s", newFilename)
+	newFilePath := fmt.Sprintf("images/%s", newFilename)
 
 	err = util.WriteImageToFilePath(util.PosterizeImage(img, 5), newFilePath)
 
@@ -44,6 +44,7 @@ func modifyImage(c echo.Context) error {
 }
 
 func main() {
+
 	e := echo.New()
 	e.Use(middleware.Logger())
 

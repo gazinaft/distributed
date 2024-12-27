@@ -8,6 +8,8 @@ require (
 	github.com/labstack/echo/v4 v4.13.3
 )
 
+require github.com/rabbitmq/amqp091-go v1.10.0 // indirect
+
 require (
 	github.com/gazinaft/distributed/util v0.0.0
 	github.com/labstack/gommon v0.4.2 // indirect
