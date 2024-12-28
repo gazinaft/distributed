@@ -4,11 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"path/filepath"
-
-	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
 )
 
 func SendImageToServiceSync(filename string) (string, error) {
@@ -45,54 +40,4 @@ func SendImageToServiceSync(filename string) (string, error) {
 	fmt.Printf("Service returned %s \n", string(data))
 
 	return string(data), nil
-}
-
-func HandlePostImageSync(c echo.Context) error {
-	file, err := c.FormFile("image")
-
-	if err != nil {
-		return err
-	}
-	fmt.Println("Successfully submitted form")
-
-	src, err := file.Open()
-	if err != nil {
-		return err
-	}
-	fmt.Println("Successfully opened file")
-
-	defer src.Close()
-
-	uuid, err := uuid.NewRandom()
-
-	if err != nil {
-		return err
-	}
-
-	// get unique filename
-	filename := uuid.String() + filepath.Ext(file.Filename)
-	fmt.Printf("created uuid %s \n", filename)
-
-	// Destination
-	fullFilePath := fmt.Sprintf("images/%s", filename)
-	dst, err := os.Create(fullFilePath)
-	if err != nil {
-		return err
-	}
-	defer dst.Close()
-
-	if _, err = io.Copy(dst, src); err != nil {
-		return err
-	}
-
-	alteredPic, err := SendImageToServiceSync(filename)
-
-	if err != nil {
-		return err
-	}
-
-	htmlToImageFilePath := fmt.Sprintf("<img src=\"/images/%s\" id=\"returned-image\">", alteredPic)
-	fmt.Println(htmlToImageFilePath)
-
-	return c.HTML(http.StatusOK, htmlToImageFilePath)
 }

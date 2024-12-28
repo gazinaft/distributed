@@ -17,7 +17,7 @@ func modifyImageAsync(filename string) (string, error) {
 
 	fmt.Printf("ImagePath of original image %s \n", filename)
 
-	img, err := util.GetImageFromFilePath(fmt.Sprintf("../../images/%s", filename))
+	img, err := util.GetImageFromFilePath(fmt.Sprintf("images/%s", filename))
 	if err != nil {
 		return "", err
 	}
@@ -32,18 +32,18 @@ func modifyImageAsync(filename string) (string, error) {
 	newFilename := uuid.String() + filepath.Ext(filename)
 	fmt.Printf("created uuid %s \n", newFilename)
 
-	newFilePath := fmt.Sprintf("../../images/%s", newFilename)
+	newFilePath := fmt.Sprintf("images/%s", newFilename)
 
 	err = util.WriteImageToFilePath(util.PosterizeImage(img, 5), newFilePath)
 
 	if err != nil {
 		return "", err
 	}
-	return newFilePath, nil
+	return newFilename, nil
 }
 
 func main() {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672")
 
 	if err != nil {
 		log.Fatal("Failed to connect to RabbitMQ")
@@ -99,6 +99,8 @@ func main() {
 
 			fmt.Printf("recieved request with image %s \n", imageName)
 
+			startTime := time.Now()
+
 			response, err := modifyImageAsync(imageName)
 			if err != nil {
 				log.Fatal("Failed to modify image")
@@ -113,16 +115,20 @@ func main() {
 					ContentType:   "text/plain",
 					CorrelationId: d.CorrelationId,
 					Body:          []byte(response),
+					Priority:      5,
 				})
 
 			if err != nil {
 				log.Fatal("Failed to publish a message")
 			}
 
+			totalTime := time.Since(startTime)
+			fmt.Printf("Took %d microseconds to handle request", totalTime.Microseconds())
+
 			d.Ack(false)
 		}
 	}()
 
-	fmt.Printf(" [*] Awaiting RPC requests")
+	fmt.Println("Awaiting RPC requests")
 	<-forever
 }

@@ -17,11 +17,22 @@
 				<label for="avatarInput">Select Image</label>
 				<input type="file" class="form-control" id="imageInput" name="image" required>
 			</div>
+
+			<label for="algoInput">Choose an algorithm:</label>
+
+			<select name="algo" id="algoInput">
+				<option value="1">Lab1</option>
+				<option value="2">Lab2</option>
+				<option value="3">Lab3</option>
+				<option value="4">RGR</option>
+			</select>
+
 			<button 
 				hx-post="/upload" 
 				hx-encoding="multipart/form-data" 
 				hx-target="#altered_image" 
-				type="submit" class=>Upload</button>
+				type="submit" class=>Upload
+			</button>
 		</form>
 	</body>
 </html>

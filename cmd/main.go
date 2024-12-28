@@ -1,9 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"io"
+	"net/http"
+	"os"
+	"path/filepath"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -26,6 +31,67 @@ func newTemplate() *Templates {
 	}
 }
 
+func HandlePostImage(c echo.Context) error {
+	file, err := c.FormFile("image")
+
+	if err != nil {
+		return err
+	}
+
+	algo := c.FormValue("algo")
+
+	fmt.Println("Successfully submitted form")
+
+	src, err := file.Open()
+	if err != nil {
+		return err
+	}
+	fmt.Println("Successfully opened file")
+
+	defer src.Close()
+
+	uuid, err := uuid.NewRandom()
+
+	if err != nil {
+		return err
+	}
+
+	// get unique filename
+	filename := uuid.String() + filepath.Ext(file.Filename)
+	fmt.Printf("created uuid %s \n", filename)
+
+	// Destination
+	fullFilePath := fmt.Sprintf("images/%s", filename)
+	dst, err := os.Create(fullFilePath)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+
+	if _, err = io.Copy(dst, src); err != nil {
+		return err
+	}
+
+	var alteredPic string
+
+	if algo == "1" {
+		alteredPic, err = SendImageToServiceSync(filename)
+	} else if algo == "2" {
+		alteredPic, err = SendImageToServiceAsync(filename)
+	} else {
+		return echo.ErrBadRequest
+	}
+
+	if err != nil {
+		return err
+	}
+
+	htmlToImageFilePath := fmt.Sprintf("<img src=\"/images/%s\" id=\"returned-image\">", alteredPic)
+	fmt.Println(htmlToImageFilePath)
+
+	return c.HTML(http.StatusOK, htmlToImageFilePath)
+}
+
 func main() {
 
 	e := echo.New()
@@ -39,7 +105,7 @@ func main() {
 		return c.Render(200, "index", nil)
 	})
 
-	e.POST("/upload", HandlePostImageSync)
+	e.POST("/upload", HandlePostImage)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

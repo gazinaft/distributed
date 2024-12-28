@@ -10,7 +10,7 @@
 8. optional: authentication
 
 # Lab 2
-1. rabbit MQ request reply
+1. ~~rabbit MQ request reply~~
 2. priority queue
 
 # Lab 3 event sourcing
