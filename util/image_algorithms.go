@@ -52,30 +52,32 @@ var BoxFilter = [][]float64{
 	{1.0 / 9, 1.0 / 9, 1.0 / 9},
 }
 
+var BoxFilter5 = [][]float64{
+	{1.0 / 25, 1.0 / 25, 1.0 / 25, 1.0 / 25, 1.0 / 25},
+	{1.0 / 25, 1.0 / 25, 1.0 / 25, 1.0 / 25, 1.0 / 25},
+	{1.0 / 25, 1.0 / 25, 1.0 / 25, 1.0 / 25, 1.0 / 25},
+	{1.0 / 25, 1.0 / 25, 1.0 / 25, 1.0 / 25, 1.0 / 25},
+	{1.0 / 25, 1.0 / 25, 1.0 / 25, 1.0 / 25, 1.0 / 25},
+}
+
 func ApplyKernel(inImage image.Image, kernel [][]float64) image.Image {
-
 	kernelSize := len(kernel)
-	padding := (kernelSize + 1) / 2
-	newImage := image.NewRGBA(image.Rect(0, 0, inImage.Bounds().Max.X-padding, inImage.Bounds().Max.Y-padding))
+	padding := kernelSize / 2
+	newImage := image.NewRGBA(image.Rect(0, 0, inImage.Bounds().Max.X-2*padding, inImage.Bounds().Max.Y-2*padding))
 
-	for y := inImage.Bounds().Min.Y; y < inImage.Bounds().Max.Y-kernelSize; y++ {
-		for x := inImage.Bounds().Min.X; x < inImage.Bounds().Max.X-kernelSize; x++ {
-
-			r := 0.0
-			g := 0.0
-			b := 0.0
-			a := 0.0
+	for x := inImage.Bounds().Min.X + padding; x < inImage.Bounds().Max.X-padding; x++ {
+		for y := inImage.Bounds().Min.Y + padding; y < inImage.Bounds().Max.Y-padding; y++ {
+			r, g, b, a := 0.0, 0.0, 0.0, 0.0
 
 			for xk := 0; xk < kernelSize; xk++ {
 				for yk := 0; yk < kernelSize; yk++ {
-					oldPixel := inImage.At(x+xk, y+yk)
-
+					oldPixel := inImage.At(x+xk-padding, y+yk-padding)
 					oldR, oldG, oldB, oldA := oldPixel.RGBA()
 
-					r += kernel[xk][yk] * float64(oldR)
-					g += kernel[xk][yk] * float64(oldG)
-					b += kernel[xk][yk] * float64(oldB)
-					a += kernel[xk][yk] * float64(oldA)
+					r += kernel[xk][yk] * float64(oldR) / 256.0
+					g += kernel[xk][yk] * float64(oldG) / 256.0
+					b += kernel[xk][yk] * float64(oldB) / 256.0
+					a += kernel[xk][yk] * float64(oldA) / 256.0
 				}
 			}
 
@@ -85,8 +87,7 @@ func ApplyKernel(inImage image.Image, kernel [][]float64) image.Image {
 			intA := uint8(a)
 
 			newPixel := color.RGBA{intR, intG, intB, intA}
-
-			newImage.Set(x, y, newPixel)
+			newImage.Set(x-padding, y-padding, newPixel)
 		}
 	}
 	return newImage
