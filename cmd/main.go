@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -30,6 +31,12 @@ func newTemplate() *Templates {
 		templates: template.Must(template.ParseGlob("views/*.html")),
 	}
 }
+
+func RandBool() bool {
+	return rand.Intn(2) == 1
+}
+
+var requestNum int = 0
 
 func HandlePostImage(c echo.Context) error {
 	file, err := c.FormFile("image")
@@ -58,6 +65,16 @@ func HandlePostImage(c echo.Context) error {
 
 	// get unique filename
 	filename := uuid.String() + filepath.Ext(file.Filename)
+
+	if algo == "1" || algo == "2" {
+		// P for Posterize C for convolution
+		if requestNum%2 == 0 {
+			filename = "P" + filename
+		} else {
+			filename = "C" + filename
+		}
+		requestNum++
+	}
 	fmt.Printf("created uuid %s \n", filename)
 
 	// Destination

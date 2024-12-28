@@ -34,7 +34,16 @@ func modifyImageAsync(filename string) (string, error) {
 
 	newFilePath := fmt.Sprintf("images/%s", newFilename)
 
-	err = util.WriteImageToFilePath(util.PosterizeImage(img, 5), newFilePath)
+	resultImage := img
+	if filename[0] == 'P' {
+		resultImage = util.PosterizeImage(img, 5)
+	} else {
+		for i := 0; i < 5; i++ {
+			resultImage = util.ApplyKernel(resultImage, util.BoxFilter5)
+		}
+	}
+
+	err = util.WriteImageToFilePath(resultImage, newFilePath)
 
 	if err != nil {
 		return "", err

@@ -49,6 +49,14 @@ func SendImageToServiceAsync(filename string) (res string, err error) {
 
 	corrId := filename
 
+	var prio uint8
+
+	if filename[0] == 'P' {
+		prio = 1
+	} else {
+		prio = 5
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -62,6 +70,7 @@ func SendImageToServiceAsync(filename string) (res string, err error) {
 			CorrelationId: corrId,
 			ReplyTo:       q.Name,
 			Body:          []byte(filename),
+			Priority:      prio, // higher prio for convolution
 		})
 
 	if err != nil {
