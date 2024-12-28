@@ -7,7 +7,7 @@ import (
 )
 
 func SendImageToServiceSync(filename string) (string, error) {
-	url := "http://localhost:8081/"
+	url := "http://image-nginx-lb/"
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 
