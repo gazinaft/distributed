@@ -21,4 +21,6 @@ WORKDIR /
 
 COPY --from=builder /build/services/orchestration/orchestrator ./services/orchestration/orchestrator
 
+COPY .env /
+
 ENTRYPOINT ["./services/orchestration/orchestrator"]
