@@ -19,14 +19,17 @@
 			</div>
 
 			<label for="algoInput">Choose an algorithm:</label>
-
 			<select name="algo" id="algoInput">
 				<option value="1">Lab1</option>
 				<option value="2">Lab2</option>
 				<option value="3">Lab3</option>
 				<option value="4">RGR</option>
 			</select>
+			<br><br>
 
+			<label for="methods">What to do for RGR: insert P for one posterization, C for one convolution</label>
+			<input type="text" id="methods" name="methods"><br><br>
+		  
 			<button 
 				hx-post="/upload" 
 				hx-encoding="multipart/form-data" 

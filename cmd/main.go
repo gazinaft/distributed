@@ -46,6 +46,7 @@ func HandlePostImage(c echo.Context) error {
 	}
 
 	algo := c.FormValue("algo")
+	methodString := c.FormValue("methods")
 
 	fmt.Println("Successfully submitted form")
 
@@ -75,6 +76,11 @@ func HandlePostImage(c echo.Context) error {
 		}
 		requestNum++
 	}
+
+	if algo == "4" {
+		filename = methodString + filename
+	}
+
 	fmt.Printf("created uuid %s \n", filename)
 
 	// Destination
@@ -95,6 +101,8 @@ func HandlePostImage(c echo.Context) error {
 		alteredPic, err = SendImageToServiceSync(filename)
 	} else if algo == "2" {
 		alteredPic, err = SendImageToServiceAsync(filename)
+	} else if algo == "4" {
+		alteredPic, err = SendImageToOrchestrator(filename)
 	} else {
 		return echo.ErrBadRequest
 	}
