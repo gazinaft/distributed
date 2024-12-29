@@ -69,20 +69,9 @@ services:
     depends_on:
       rabbit:
         condition: service_healthy
-
-  orchestrator:
-    build: 
-      context: .
-      dockerfile: orchestrator.Dockerfile
-    container_name: orchestrator
-    networks:
-      - distributed-network
-    volumes:
-      - ./images:/images
-    depends_on:
-      rabbit:
+      postgres:
         condition: service_healthy
-
+      
   image-nginx-lb:
     image: nginx:1.27.3-alpine
     container_name: image-nginx-lb
@@ -93,6 +82,21 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - image-service
+
+  event-service:
+    build: 
+     context: .
+     dockerfile: event.Dockerfile
+    container_name: event-service
+    networks:
+      - distributed-network
+    volumes:
+      - ./images:/images
+    depends_on:
+      rabbit:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
 
   api-service:
     build: 
@@ -110,6 +114,7 @@ services:
         condition: service_healthy
       rabbit:
         condition: service_healthy
+
 
 
 volumes:

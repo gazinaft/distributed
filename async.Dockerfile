@@ -21,4 +21,6 @@ WORKDIR /
 
 COPY --from=builder /build/services/async/image-service-async ./services/async/image-service-async
 
+COPY .env /
+
 ENTRYPOINT ["./services/async/image-service-async"]

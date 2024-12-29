@@ -25,6 +25,8 @@ COPY ./views/*.html ./views/
 
 COPY --from=builder /build/cmd/main ./cmd/main
 
+COPY .env /
+
 EXPOSE 8080
 
 ENTRYPOINT ["./cmd/main"]

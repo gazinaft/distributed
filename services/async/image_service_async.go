@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/gazinaft/distributed/util"
 	"github.com/google/uuid"
+	"github.com/joho/godotenv"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -52,7 +54,18 @@ func modifyImageAsync(filename string) (string, error) {
 }
 
 func main() {
-	conn, err := amqp.Dial("amqp://guest:guest@rabbit:5672")
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
+	rabbit_user := os.Getenv("RABBIT_USER")
+	rabbit_pw := os.Getenv("RABBIT_PASSWORD")
+
+	rabbit_conn := fmt.Sprintf("amqp://%s:%s@rabbit:5672", rabbit_user, rabbit_pw)
+
+	conn, err := amqp.Dial(rabbit_conn)
 
 	if err != nil {
 		log.Fatal("Failed to connect to RabbitMQ")
