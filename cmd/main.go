@@ -78,6 +78,9 @@ func HandlePostImage(c echo.Context) error {
 	}
 
 	if algo == "4" {
+		if len(methodString) == 0 {
+			return nil
+		}
 		filename = methodString + filename
 	}
 

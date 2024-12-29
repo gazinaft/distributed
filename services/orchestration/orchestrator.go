@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func OrchestratedCompute(filename string, ch *amqp.Channel) (res string, err error) {
+func OrchestratedCompute(filename string, ch *amqp.Channel, computationSteps *uint8) (res string, err error) {
 
 	q, err := ch.QueueDeclare(
 		"",    // name
@@ -38,14 +39,6 @@ func OrchestratedCompute(filename string, ch *amqp.Channel) (res string, err err
 
 	corrId := filename
 
-	var prio uint8
-
-	if filename[0] == 'P' {
-		prio = 1
-	} else {
-		prio = 5
-	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
 	defer cancel()
 
@@ -59,12 +52,14 @@ func OrchestratedCompute(filename string, ch *amqp.Channel) (res string, err err
 			CorrelationId: corrId,
 			ReplyTo:       q.Name,
 			Body:          []byte(filename),
-			Priority:      prio, // higher prio for convolution
+			Priority:      *computationSteps, // higher prio for convolution
 		})
 
 	if err != nil {
 		return "", err
 	}
+
+	*computationSteps += 1
 
 	for d := range msgs {
 		if corrId == d.CorrelationId {
@@ -130,12 +125,20 @@ func main() {
 		defer cancel()
 		for d := range msgs {
 			imageName := string(d.Body)
+			encodedSteps := imageName[:8]
 
 			fmt.Printf("recieved request with image %s \n", imageName)
 
 			startTime := time.Now()
 
-			response, err := OrchestratedCompute(imageName, ch)
+			var computationSteps uint8 = 0
+			for len(encodedSteps) > 0 && (encodedSteps[0] == 'C' || encodedSteps[0] == 'P') {
+				os.Rename(imageName, encodedSteps[:1]+imageName)
+				imageName, err = OrchestratedCompute(imageName, ch, &computationSteps)
+				fmt.Printf("recieved request with image %s \n", imageName)
+				encodedSteps = encodedSteps[1:]
+			}
+
 			if err != nil {
 				log.Fatal("Failed to modify image")
 			}
@@ -148,7 +151,7 @@ func main() {
 				amqp.Publishing{
 					ContentType:   "text/plain",
 					CorrelationId: d.CorrelationId,
-					Body:          []byte(response),
+					Body:          []byte(imageName),
 					Priority:      5,
 				})
 

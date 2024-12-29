@@ -70,6 +70,19 @@ services:
       rabbit:
         condition: service_healthy
 
+  orchestrator:
+    build: 
+      context: .
+      dockerfile: orchestrator.Dockerfile
+    container_name: orchestrator
+    networks:
+      - distributed-network
+    volumes:
+      - ./images:/images
+    depends_on:
+      rabbit:
+        condition: service_healthy
+
   image-nginx-lb:
     image: nginx:1.27.3-alpine
     container_name: image-nginx-lb
@@ -93,7 +106,11 @@ services:
     volumes:
       - ./images:/images
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      rabbit:
+        condition: service_healthy
+
 
 volumes:
   db-data:
