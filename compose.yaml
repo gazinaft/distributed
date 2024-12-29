@@ -49,6 +49,19 @@ services:
     depends_on:
       - postgres
   
+  image-service-async:
+    build: 
+      context: .
+      dockerfile: async.Dockerfile
+    deploy:
+      replicas: 2
+    networks:
+      - distributed-network
+    volumes:
+      - ./images:/images
+    depends_on:
+      - rabbit
+
   image-nginx-lb:
     image: nginx:1.27.3-alpine
     container_name: image-nginx-lb

@@ -77,7 +77,7 @@ func OrchestratedCompute(filename string, ch *amqp.Channel) (res string, err err
 }
 
 func main() {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672")
+	conn, err := amqp.Dial("amqp://guest:guest@rabbit:5672")
 
 	if err != nil {
 		log.Fatal("Failed to connect to RabbitMQ")
