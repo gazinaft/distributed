@@ -141,17 +141,19 @@ func main() {
 			fmt.Printf("recieved request with image %s \n", imageName)
 
 			startTime := time.Now()
-
 			var computationSteps uint8 = 0
+
 			for len(encodedSteps) > 0 && (encodedSteps[0] == 'C' || encodedSteps[0] == 'P') {
+				fmt.Printf("current encoded steps %s \n", encodedSteps)
+
 				os.Rename(imageName, encodedSteps[:1]+imageName)
 				imageName, err = OrchestratedCompute(imageName, ch, &computationSteps)
+				if err != nil {
+					log.Fatal("Failed to modify image")
+				}
+
 				fmt.Printf("recieved request with image %s \n", imageName)
 				encodedSteps = encodedSteps[1:]
-			}
-
-			if err != nil {
-				log.Fatal("Failed to modify image")
 			}
 
 			err = ch.PublishWithContext(ctx,

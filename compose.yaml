@@ -98,6 +98,19 @@ services:
       postgres:
         condition: service_healthy
 
+  orchestrator:
+    build: 
+      context: .
+      dockerfile: orchestrator.Dockerfile
+    container_name: orchestrator
+    networks:
+      - distributed-network
+    volumes:
+      - ./images:/images
+    depends_on:
+      rabbit:
+        condition: service_healthy
+
   api-service:
     build: 
      context: .
