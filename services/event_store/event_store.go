@@ -110,18 +110,26 @@ func main() {
 
 			encodedSteps := imageName[:8]
 
-			insertDynStmt := `insert into "events"("filename", "event_type", "step", "timestamp") values($1, $2, $3, $4)`
+			insertDynStmt := `
+				INSERT INTO events (filename, event_type, step, timestamp)
+				VALUES ($1, $2, $3, $4);
+			`
+			_, err := db.Query("select * from events")
 
-			fmt.Printf("recieved request with image %s \n", imageName)
+			if err != nil {
+				log.Fatal("no events table")
+			}
 
 			var computationSteps uint8 = 0
 
 			for len(encodedSteps) > 0 && (encodedSteps[0] == 'C' || encodedSteps[0] == 'P') {
 				fmt.Printf("current encoded steps %s \n", encodedSteps)
 
+				fmt.Printf("trying to insert into a DB: %s, %s, %d, %v", imageName, encodedSteps[:1], computationSteps, time.Now())
+
 				_, err := db.Exec(insertDynStmt, imageName, encodedSteps[:1], computationSteps, time.Now())
 				if err != nil {
-					log.Fatal("Failed to insert event into DB")
+					log.Fatalf("Failed to insert event into DB, %v", err)
 				}
 
 				encodedSteps = encodedSteps[1:]
