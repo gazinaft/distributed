@@ -1,0 +1,52 @@
+services:
+  rabbit:
+    image: rabbitmq:3
+    container_name: rabbitmq
+    restart: always
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBIT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBIT_PASSWORD}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - distributed-network
+
+  image-service-async:
+    build: 
+      context: .
+      dockerfile: async.Dockerfile
+    deploy:
+      replicas: 2
+    networks:
+      - distributed-network
+    volumes:
+      - ./images:/images
+    depends_on:
+      rabbit:
+        condition: service_healthy      
+
+  api-service:
+    build: 
+     context: .
+     dockerfile: main.Dockerfile
+    container_name: api-service
+    ports:
+      - "8080:8080"
+    networks:
+      - distributed-network
+    volumes:
+      - ./images:/images
+    depends_on:
+      rabbit:
+        condition: service_healthy
+
+networks:
+  distributed-network:
+    external: true

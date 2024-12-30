@@ -1,0 +1,114 @@
+services:
+  postgres:
+    image: postgres:17.2-alpine3.21
+    container_name: postgres
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -h ${DB_HOST} -d ${DB_NAME}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_HOST: ${DB_HOST}
+    ports:
+      - "5432:5432"
+    networks:
+      - distributed-network
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  rabbit:
+    image: rabbitmq:3
+    container_name: rabbitmq
+    restart: always
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBIT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBIT_PASSWORD}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - distributed-network
+
+  image-service-async:
+    build: 
+      context: .
+      dockerfile: async.Dockerfile
+    deploy:
+      replicas: 2
+    networks:
+      - distributed-network
+    volumes:
+      - ./images:/images
+    depends_on:
+      rabbit:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      
+  event-service:
+    build: 
+     context: .
+     dockerfile: event.Dockerfile
+    container_name: event-service
+    networks:
+      - distributed-network
+    volumes:
+      - ./images:/images
+    depends_on:
+      rabbit:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  materialization:
+    build: 
+     context: .
+     dockerfile: materializaion.Dockerfile
+    container_name: materialization-servive
+    networks:
+      - distributed-network
+    volumes:
+      - ./images:/images
+    depends_on:
+      rabbit:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  api-service:
+    build: 
+     context: .
+     dockerfile: main.Dockerfile
+    container_name: api-service
+    ports:
+      - "8080:8080"
+    networks:
+      - distributed-network
+    volumes:
+      - ./images:/images
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbit:
+        condition: service_healthy
+
+volumes:
+  db-data:
+    name: db-data
+    external: true
+
+networks:
+  distributed-network:
+    external: true
