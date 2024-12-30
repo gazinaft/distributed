@@ -1,3 +1,5 @@
+// lab 2
+
 package main
 
 import (
@@ -145,7 +147,7 @@ func main() {
 			}
 
 			totalTime := time.Since(startTime)
-			fmt.Printf("Took %d microseconds to handle request", totalTime.Microseconds())
+			fmt.Printf("Took %d microseconds to handle request \n", totalTime.Microseconds())
 
 			d.Ack(false)
 		}

@@ -1,13 +1,17 @@
+// lab 3
+
 package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
 	"time"
 
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -79,6 +83,29 @@ func main() {
 		log.Fatalf("Error loading .env file")
 	}
 
+	dbname := os.Getenv("DB_NAME")
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	host := os.Getenv("DB_HOST")
+	port := "5432"
+
+	psqlconn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+
+	db, err := sql.Open("postgres", psqlconn)
+
+	if err != nil {
+		log.Fatalln("Couldn't connect to a DB")
+	}
+
+	defer db.Close()
+
+	// check db
+	err = db.Ping()
+	if err != nil {
+		log.Fatalln("DB does not respond")
+	}
+	fmt.Println("Connected!")
+
 	rabbit_user := os.Getenv("RABBIT_USER")
 	rabbit_pw := os.Getenv("RABBIT_PASSWORD")
 
@@ -136,24 +163,50 @@ func main() {
 		defer cancel()
 		for d := range msgs {
 			imageName := string(d.Body)
-			encodedSteps := imageName[:8]
 
 			fmt.Printf("recieved request with image %s \n", imageName)
+
+			query := `
+				SELECT event_type 
+				FROM events
+				WHERE filename = $1
+				ORDER BY timestamp ASC;
+			`
+
+			rows, err := db.Query(query, imageName)
+
+			if err != nil {
+				log.Fatal("Failed to make a query")
+			}
+
+			eventTypes := make([]string, 0)
+
+			for rows.Next() {
+				var eventType string
+
+				err = rows.Scan(&eventType)
+				if err != nil {
+					log.Fatal("Faild to read row")
+				}
+
+				eventTypes = append(eventTypes, eventType)
+				fmt.Printf("Read from DB event type %s \n", eventType)
+			}
+			rows.Close()
 
 			startTime := time.Now()
 			var computationSteps uint8 = 0
 
-			for len(encodedSteps) > 0 && (encodedSteps[0] == 'C' || encodedSteps[0] == 'P') {
-				fmt.Printf("current encoded steps %s \n", encodedSteps)
+			for i := 0; i < len(eventTypes); i++ {
+				fmt.Printf("current encoded steps %s \n", eventTypes[i])
 
-				os.Rename(imageName, encodedSteps[:1]+imageName)
+				os.Rename(imageName, eventTypes[i]+imageName)
 				imageName, err = OrchestratedCompute(imageName, ch, &computationSteps)
 				if err != nil {
 					log.Fatal("Failed to modify image")
 				}
 
 				fmt.Printf("recieved request with image %s \n", imageName)
-				encodedSteps = encodedSteps[1:]
 			}
 
 			err = ch.PublishWithContext(ctx,

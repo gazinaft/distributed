@@ -1,3 +1,5 @@
+// lab 1-4
+
 package main
 
 import (
@@ -77,7 +79,7 @@ func HandlePostImage(c echo.Context) error {
 		requestNum++
 	}
 
-	if algo == "4" {
+	if algo == "4" || algo == "3" {
 		if len(methodString) == 0 {
 			return nil
 		}
@@ -104,6 +106,8 @@ func HandlePostImage(c echo.Context) error {
 		alteredPic, err = SendImageToServiceSync(filename)
 	} else if algo == "2" {
 		alteredPic, err = SendImageToServiceAsync(filename)
+	} else if algo == "3" {
+		alteredPic, err = SendImageToEventStore(filename)
 	} else if algo == "4" {
 		alteredPic, err = SendImageToOrchestrator(filename)
 	} else {

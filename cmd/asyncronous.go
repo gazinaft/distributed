@@ -1,3 +1,7 @@
+// lab 2 func SendImageToServiceAsync
+// lab 3 func SendImageToEventStore
+// lab 4 func SendImageToOrchestrator
+
 package main
 
 import (

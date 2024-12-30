@@ -98,6 +98,21 @@ services:
       postgres:
         condition: service_healthy
 
+  materialization:
+    build: 
+     context: .
+     dockerfile: materialization.Dockerfile
+    container_name: materialization-servive
+    networks:
+      - distributed-network
+    volumes:
+      - ./images:/images
+    depends_on:
+      rabbit:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
   orchestrator:
     build: 
       context: .
