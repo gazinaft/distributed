@@ -12,7 +12,7 @@ RUN go mod download
 
 WORKDIR /build/services/materialization
 
-RUN CGO_ENABLED=0 go build -o ./image-service-async
+RUN CGO_ENABLED=0 go build -o ./ materialization
 
 
 FROM bash:devel-alpine3.21
