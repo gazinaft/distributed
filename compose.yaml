@@ -101,7 +101,7 @@ services:
   materialization:
     build: 
      context: .
-     dockerfile: materialization.Dockerfile
+     dockerfile: materializaion.Dockerfile
     container_name: materialization-servive
     networks:
       - distributed-network
