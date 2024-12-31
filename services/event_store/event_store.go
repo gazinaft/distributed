@@ -85,16 +85,16 @@ func main() {
 	}
 
 	msgs, err := ch.Consume(
-		q.Name,            // queue
-		"event_store_out", // consumer
-		false,             // auto-ack
-		false,             // exclusive
-		false,             // no-local
-		false,             // no-wait
-		nil,               // args
+		q.Name, // queue
+		"",     // consumer
+		false,  // auto-ack
+		false,  // exclusive
+		false,  // no-local
+		false,  // no-wait
+		nil,    // args
 	)
 	if err != nil {
-		log.Fatal("Failed to register a consumer")
+		log.Fatalf("Failed to register a consumer, %v", err)
 	}
 	var forever chan struct{}
 
@@ -114,18 +114,18 @@ func main() {
 				INSERT INTO events (filename, event_type, step, timestamp)
 				VALUES ($1, $2, $3, $4);
 			`
-			_, err := db.Query("select * from events")
+			// _, err := db.Query("select * from events;")
 
-			if err != nil {
-				log.Fatal("no events table")
-			}
+			// if err != nil {
+			// 	log.Fatal("no events table")
+			// }
 
 			var computationSteps uint8 = 0
 
 			for len(encodedSteps) > 0 && (encodedSteps[0] == 'C' || encodedSteps[0] == 'P') {
-				fmt.Printf("current encoded steps %s \n", encodedSteps)
+				// 		fmt.Printf("current encoded steps %s \n", encodedSteps)
 
-				fmt.Printf("trying to insert into a DB: %s, %s, %d, %v", imageName, encodedSteps[:1], computationSteps, time.Now())
+				fmt.Printf("trying to insert into a DB: %s, %s, %d", imageName, encodedSteps[:1], computationSteps)
 
 				_, err := db.Exec(insertDynStmt, imageName, encodedSteps[:1], computationSteps, time.Now())
 				if err != nil {
@@ -136,15 +136,15 @@ func main() {
 			}
 
 			err = ch.PublishWithContext(ctx,
-				"event_store_out", // exchange
-				d.ReplyTo,         // routing key
+				"",                // exchange
+				"event_store_out", // routing key
 				false,             // mandatory
 				false,             // immediate
 				amqp.Publishing{
 					ContentType:   "text/plain",
 					CorrelationId: d.CorrelationId,
 					Body:          []byte(imageName),
-					Priority:      5,
+					ReplyTo:       d.ReplyTo,
 				})
 
 			if err != nil {

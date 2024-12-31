@@ -218,7 +218,6 @@ func main() {
 					ContentType:   "text/plain",
 					CorrelationId: d.CorrelationId,
 					Body:          []byte(imageName),
-					Priority:      5,
 				})
 
 			if err != nil {
