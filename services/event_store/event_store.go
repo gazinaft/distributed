@@ -114,11 +114,6 @@ func main() {
 				INSERT INTO events (filename, event_type, step, timestamp)
 				VALUES ($1, $2, $3, $4);
 			`
-			// _, err := db.Query("select * from events;")
-
-			// if err != nil {
-			// 	log.Fatal("no events table")
-			// }
 
 			var computationSteps uint8 = 0
 
